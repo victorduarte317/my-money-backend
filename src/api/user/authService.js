@@ -21,7 +21,7 @@ const login = (req, res, next) => {
         if (err) {
             return sendErrorsFromDB(res, err)
         } else if (user && bcrypt.compareSync(password, user.password)) {
-            const token = jwt.sign(user, env.authSecret, { 
+            const token = jwt.sign({ ...user }, env.authSecret, { 
                 expiresIn: "1 day"
             })
             const { name, email } = user
@@ -39,3 +39,48 @@ const validateToken = (req, res, next) => {
         return res.status(200).send({ valid: !err })
     })
 }
+
+const signup = (req, res, any) => {
+        const name = req.body.name || ''
+        const email = req.body.email || ''
+        const password = req.body.password || ''
+        const confirmPassword = req.body.confirm_password || ''
+
+        if (!email.match(emailRegex)) {
+            return res.status(400).send({ errors: ['Invalid email.']})
+        }
+
+        if (!password.match(passwordRegex)) {
+                return res.status(400).send({errors: [
+                    "The password needs to have a capital and a minuscule character, a number, a special character(@#$%) and a size between 6-20 characters."
+                ]
+            })
+        }
+    
+
+    const salt = bcrypt.genSaltSync()
+    const passwordHash = bcrypt.hashSync(password, salt)
+    if(!bcrypt.compareSync(confirmPassword, passwordHash)) {
+        return res.status(400).send({errors: ['Passwords dont match.']})
+    }
+
+    User.findOne({ email }, (err, user) => {
+        if(err) {
+            return sendErrorsFromDB(res, err)
+        } else if (user) {
+            return res.status(400).send({ errors: ['User already registered.'] })
+        } else {
+            const newUser = new User({ name, email, password: passwordHash })
+            newUser.save(err => {
+                if(err){
+                    return sendErrorsFromDB(res, err)
+                } else {
+                    login(req, res, next)
+                }
+            })
+        }
+    })
+}
+
+module.exports = {login, signup, validateToken }
+
