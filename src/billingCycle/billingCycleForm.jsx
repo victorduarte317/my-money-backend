@@ -4,15 +4,9 @@ import { bindActionCreators } from 'redux'
 import { reduxForm, Field, formValueSelector } from 'redux-form'
 
 import { init } from './billingCycleActions'
-<<<<<<< HEAD
 import LabelInput from '../common/form/labelAndInput'
 import ItemList from './itemList'
 import Summary from './summary'
-=======
-import LabelInput from '../common/form/labelInput'
-import ItemList from './itemList'
-import Summary from './Summary'
->>>>>>> a124684902aa2e1949eeef1cdf83e2bb30378030
 
 class BillingCycleForm extends Component {
    
